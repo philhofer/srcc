@@ -38,15 +38,16 @@
  ;; script such that all but the last line are wrapped
  ;; with 'if { line }'
  (define (execline-join lines)
-   (if (string? lines)
-       lines
-       (let loop ([out '()]
-		  [rest lines])
-	 (cond
-	  [(null? rest) out]
-	  [(null? (cdr rest)) (reverse (cons (car rest) out))]
-	  [else (loop (cons (format "if { ~a }" (car rest)) out)
-		      (cdr rest))]))))
+   (cons "#!/bin/execlineb -P"
+	 (if (string? lines)
+	     (list lines)
+	     (let loop ([out '()]
+			[rest lines])
+	       (cond
+		[(null? rest) out]
+		[(null? (cdr rest)) (reverse (cons (car rest) out))]
+		[else (loop (cons (format "if { ~a }" (car rest)) out)
+			    (cdr rest))])))))
 
  ;; (ifopt sym alist expr)
  ;; produces either (cdr (assq sym alist))
@@ -120,7 +121,7 @@
  (define (l3-static . addrs)
    (l3-oneshot
     (lambda (name options)
-      (map (cut format "ip addr add ~a dev ~a valid_lft forever" <> name) addrs))
+      (map (cut format "ip addr replace ~a dev ~a valid_lft forever" <> name) addrs))
     (lambda (name options)
       (map (cut format "ip addr del ~a dev ~a" <> name) addrs))))
 
@@ -155,7 +156,7 @@
 	   options
 	   coldplug
 	   l2-auto
-	   (l3-static "127.0.0.1/8" "::1/128"))))))
+	   (l3-static "127.0.0.1/8 scope host" "::1/128 scope host"))))))
 
  (define (net-longrun level up-fn down-fn)
    (lambda (name options)
