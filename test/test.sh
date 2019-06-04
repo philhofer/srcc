@@ -6,7 +6,7 @@ compiledir="./compiledir"
 
 for src in *.scm; do
 	svcdir=$(mktemp -d -p .)
-	../ss6c -d ${svcdir} -c ${compiledir} ${src} || {
+	../srcc -d ${svcdir} -c ${compiledir} ${src} || {
 	    echo "compiling ${src} failed"
 	    exit 1
 	}

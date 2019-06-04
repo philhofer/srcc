@@ -9,15 +9,17 @@
  (chicken process-context)
  (chicken pretty-print)
  (chicken condition)
- (chicken eval)
  (optimism)
  s6-rc)
 
+;; HACK:
 ;; we've linked in this code, but this
-;; module doesn't actually use it other
-;; than to create a handle to it with
-;; module-environment
+;; module doesn't load it; instead,
+;; it is loaded inside of (eval ...),
+;; but we don't want to search for
+;; the import library at runtime
 (declare (uses interface))
+(include "interface.import.scm")
 
 (define (file->list file)
   (define iter
@@ -32,13 +34,14 @@
 ;; and import the necessary identifiers
 (define (file->script file)
   `(begin
+     (import interface)
      (flatten1
       ,@(file->list file))))
 
 (define (eval-file file)
   (eval
    (file->script file)
-   (module-environment 'interface)))
+   (interaction-environment)))
 
 (define (usage)
   (display #<#EOF
@@ -72,6 +75,9 @@ EOF
 
 (let* ([cmdline
 	(parse-cmdline)]
+       [_
+	(when (eqv? (length cmdline) 1) ;; just ((--))
+	  (usage))]
        [cmd-args
 	(assq-tail '-- cmdline usage)]
        [destdir

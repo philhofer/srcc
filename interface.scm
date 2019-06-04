@@ -21,9 +21,6 @@
   (chicken base)
   (chicken module))
 
- ;; make chicken visible
- (reexport scheme)
-
  ;; interfaces are represented as alists
  ;; that have at least the following fields:
  ;;
@@ -174,23 +171,26 @@
  
  (define l2-default-wpa
    ;; TODO: think about not hard-coding the path
-   ;; to the config file here...
-   (net-longrun 'l2
-    (lambda (name options) #<#EOF
-fdmove -c 2 1
-wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i #{name}
-EOF
-)
+   ;; to the config file here; could get it from options...
+   (net-longrun
+    'l2
+    (lambda (name options)
+      (list
+       "fdmove -c 2 1"
+       (format "wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i ~a" name)))
     empty-script))
 
+ ;; 'automatic' level 3 configuration
+ ;; (use dhcpcd for dhcpv4+slaac)
  (define l3-auto
-   (net-longrun 'l3
-    (lambda (name options) #<#EOF
-fdmove -c 2 1
-dhcpcd -B #{name}
-EOF
-)
-    empty-script))
+   (net-longrun
+    'l3
+    (lambda (name options)
+      (list
+       "fdmove -c 2 1"
+       (format "dhcpcd -B ~a" name)))
+   (lambda (name options)
+      (format "ip addr flush dev ~a scope global" name))))
 
  ;; wireless creates a managed wireless interface
  ;; (presently, using wpa_supplicant and dhcpcd)
