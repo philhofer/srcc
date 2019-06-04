@@ -173,10 +173,12 @@
  (define empty-script (lambda (name options) '()))
  
  (define l2-default-wpa
+   ;; TODO: think about not hard-coding the path
+   ;; to the config file here...
    (net-longrun 'l2
     (lambda (name options) #<#EOF
 fdmove -c 2 1
-wpa_supplicant -i #{name}
+wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -i #{name}
 EOF
 )
     empty-script))
