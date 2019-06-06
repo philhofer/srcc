@@ -114,6 +114,6 @@
 			      (string-append p "/" (->string (car elem)))
 			      (cdr elem)))
 			   datum)))])
-     (alist->dir (string-append root "/" (car desc)) (cdr desc))))
+     (alist->dir (string-append root "/" (->string (car desc))) (cdr desc))))
 
 )

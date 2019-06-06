@@ -220,21 +220,6 @@
  (define (iface-name iface)
    (ifopt 'name iface (error "interface has no name?")))
 
- ;; cursory interface validity checking
- (define (check-iface ifa)
-   (and (or (alist? ifa)
-	    (error "interface not an alist:" ifa))
-	(or (assq 'name ifa)
-	    (error "interface has no name:" ifa))
-	(or (assq 'type ifa)
-	    (error "interface has no type:" ifa))
-	(or (andmap (lambda (stage)
-		      (if (assq stage ifa)
-			  (alist? (cdr (assq stage ifa)))
-			  #t))
-		    '(l1 l2 l3))
-	    (error "interface has invalid level definition(s):" ifa))))
- 
  ;; emit all the services for an interface
  (define (net->services iface)
    (let ([name  (iface-name iface)]
@@ -317,7 +302,7 @@
  
  (define (bundle name . contents)
    `((,name (type . bundle)
-	   (contents . ,contents))))
+	    (contents . ,contents))))
 
  (define (flatten1 . args)
    (let loop ([lst args])
@@ -328,5 +313,4 @@
 	   (if (list? head)
 	       (append head rest)
 	       (cons head rest))))))
-
 )
